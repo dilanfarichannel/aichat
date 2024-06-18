@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tingkatan Layanan</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+    }
+    .container {
+        max-width: 600px;
+        margin: 20px auto;
+        padding: 20px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        background-color: #f9f9f9;
+    }
+    button {
+        font-size: 16px;
+        padding: 10px 20px;
+        margin: 10px;
+        cursor: pointer;
+        border: none;
+        border-radius: 3px;
+        background-color: dodgerblue;
+        color: white;
+    }
+    button:hover {
+        background-color: #007bff;
+    }
+</style>
+</head>
+<body>
+<div class="container">
+    <h2>Tingkatan Layanan</h2>
+    <p>Silakan pilih tingkatan layanan yang Anda inginkan:</p>
+    
+    <button onclick="openBasics()">Basics (memerlukan kode)</button>
+    <button onclick="openPro()">Pro (memerlukan kode)</button>
+    <button onclick="openPremium()">Premium (memerlukan kode)</button>
+    <button onclick="resetPurchases()">Reset Pembelian</button> <!-- Tombol untuk mereset data pembelian -->
+
+    <p>Code 7 Digit #######</p>
+
+    <h3>Basics</h3>
+    <p>Kecepatan Ai : 0.2 Detik
+        Versi AI : Bot-2.5
+        jumlah kata : sedikit
+    </p>
+    <h3>Pro</h3>
+    <p>Kecepatan Ai : 0.2 Detik
+        Versi AI : Bot-3
+        jumlah kata : sedang
+    </p>
+    <h3>Premium</h3>
+    <p>Kecepatan Ai : 0.1 Detik
+        Versi AI : Bot-3.5
+        jumlah kata : banyak
+    </p>
+</div>
+
+<script>
+    // Fungsi untuk memeriksa apakah tingkat layanan sudah terbuka sebelumnya
+    function checkOpenedLevel(level) {
+        return localStorage.getItem(level) === 'opened';
+    }
+
+    function openBasics() {
+        if (checkOpenedLevel('basics')) {
+            // Jika Pro sudah terbuka sebelumnya, langsung arahkan ke halaman Pro
+            alert("Anda Telah memiliki basics sebelumnya! memasuki pro")
+            window.location.href = 'AiChat2.5.html';
+        } else {
+            // Tampilkan form input kode
+            document.getElementById('basicsCode').style.display = 'block';
+        }
+    }
+
+    function checkBasicsCode() {
+        var code = document.getElementById('basicsInput').value;
+        // Ganti dengan kode yang sesuai untuk verifikasi kode Pro
+        if (code === '7WTY2R8') {
+            // Simpan status Pro telah terbuka di localStorage
+            localStorage.setItem('basics1', 'opened');
+            // Arahkan ke halaman Pro
+            alert("Anda Telah Berhasil Membuka Basics!")
+            window.location.href = 'AiChat2.5.html';
+        } else {
+            alert('Kode yang Anda masukkan salah. Silakan coba lagi.');
+        }
+    }
+
+    function openPro() {
+        if (checkOpenedLevel('pro')) {
+            // Jika Pro sudah terbuka sebelumnya, langsung arahkan ke halaman Pro
+            alert("Anda Telah memiliki pro sebelumnya! memasuki pro")
+            window.location.href = 'AiChat3.html';
+        } else {
+            // Tampilkan form input kode
+            document.getElementById('proCode').style.display = 'block';
+        }
+    }
+
+    function checkProCode() {
+        var code = document.getElementById('proInput').value;
+        // Ganti dengan kode yang sesuai untuk verifikasi kode Pro
+        if (code === '7WGZ2R8') {
+            // Simpan status Pro telah terbuka di localStorage
+            localStorage.setItem('pro1', 'opened');
+            // Arahkan ke halaman Pro
+            alert("Anda Telah Berhasil Membuka Pro!")
+            window.location.href = 'AiChat3.html';
+        } else {
+            alert('Kode yang Anda masukkan salah. Silakan coba lagi.');
+        }
+    }
+
+    function openPremium() {
+        if (checkOpenedLevel('premium')) {
+            // Jika Premium sudah terbuka sebelumnya, langsung arahkan ke halaman Premium
+            alert("Anda Telah memiliki premium sebelumnya! memasuki premium")
+            window.location.href = 'AiChat3.5.html';
+        } else {
+            // Tampilkan form input kode
+            document.getElementById('premiumCode').style.display = 'block';
+        }
+    }
+
+    function checkPremiumCode() {
+        var code = document.getElementById('premiumInput').value;
+        // Ganti dengan kode yang sesuai untuk verifikasi kode Premium
+        if (code === 'QWZ9Y2Y2') {
+            // Simpan status Premium telah terbuka di localStorage
+            localStorage.setItem('premium1', 'opened');
+            // Arahkan ke halaman Premium
+            alert("Anda Telah Berhasil Membuka Premium!")
+            window.location.href = 'AiChat3.5.html';
+        } else {
+            alert('Kode yang Anda masukkan salah. Silakan coba lagi.');
+        }
+    }
+
+    function resetPurchases() {
+        // Hapus semua item dari localStorage
+        localStorage.clear();
+        alert('Data pembelian telah direset.');
+        // Refresh halaman untuk memulai dari awal
+        window.location.reload();
+    }
+</script>
+
+<div id="basicsCode" style="display: none;">
+    <label for="basicsInput">Masukkan kode untuk membuka basics:</label><br>
+    <input type="text" id="basicsInput" placeholder="Masukkan kode">
+    <button onclick="checkBasicsCode()">Submit</button>
+</div>
+
+<!-- Form untuk memasukkan kode Pro -->
+<div id="proCode" style="display: none;">
+    <label for="proInput">Masukkan kode untuk membuka Pro:</label><br>
+    <input type="text" id="proInput" placeholder="Masukkan kode">
+    <button onclick="checkProCode()">Submit</button>
+</div>
+
+<!-- Form untuk memasukkan kode Premium -->
+<div id="premiumCode" style="display: none;">
+    <label for="premiumInput">Masukkan kode untuk membuka Premium:</label><br>
+    <input type="text" id="premiumInput" placeholder="Masukkan kode">
+    <button onclick="checkPremiumCode()">Submit</button>
+</div>
+
+</body>
+</html>

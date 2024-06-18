@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AICHAT-1.5</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #000;
+            color: #fff;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .sidebar {
+            background-color: #333;
+            width: 200px;
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .sidebar h2 {
+            margin-top: 0;
+            color: #fff;
+        }
+        .sidebar button {
+            background-color: #555;
+            color: #fff;
+            border: none;
+            padding: 5px 15px;
+            margin: 5px 0;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+        }
+        .sidebar button:hover {
+            background-color: #777;
+        }
+        .chat-container {
+            background-color: #222;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            margin: 20px;
+            color: #fff;
+        }
+        .chat-header {
+            background-color: #333;
+            padding: 5px;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            text-align: center;
+            font-size: 18px;
+        }
+        .chat-box {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        .chat-input {
+            display: flex;
+            border-top: 1px solid #444;
+            padding: 10px;
+        }
+        .chat-input textarea {
+            flex: 1;
+            height: 20px;
+            border: none;
+            border-radius: 4px;
+            padding: 10px;
+            font-size: 16px;
+            resize: none;
+            margin-right: 10px;
+            background-color: #fff;
+            color: #000;
+        }
+        .chat-input button {
+            background-color: #555;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .chat-input button:hover {
+            background-color: #777;
+        }
+        .message {
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: flex-start;
+        }
+        .message.user {
+            justify-content: flex-end;
+        }
+        .message .bubble {
+            padding: 10px;
+            border-radius: 10px;
+            max-width: 80%;
+        }
+        .message.user .bubble {
+            background-color: #949494;
+            color: #000;
+            align-self: flex-end;
+        }
+        .message.ai .bubble {
+            background-color: #949494;
+            color: #000;
+            align-self: flex-start;
+        }
+        .typing {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start; /* Ubah menjadi flex-start untuk muncul di sebelah kiri */
+            margin-left: 20px; /* Tambahkan margin kiri untuk penempatan yang lebih baik */
+        }
+        .typing .dot {
+            height: 8px;
+            width: 8px;
+            background-color: #bbb;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 4px;
+            animation: blink 1.4s infinite both;
+        }
+        .typing .dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        .typing .dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        @keyframes blink {
+            0% {
+                opacity: 0.2;
+            }
+            20% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0.2;
+            }
+        }
+        .upgrade-button {
+        text-align: center;
+        margin-top: 20px;
+    }
+    .upgrade-button button {
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        text-align: center;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        margin: 4px 2px;
+        cursor: pointer;
+        border-radius: 4px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        transition: background-color 0.3s;
+    }
+    .upgrade-button button img {
+        width: 10px; /* Sesuaikan ukuran gambar */
+        height: 10px; /* Sesuaikan tinggi gambar */
+        margin-right: 5px; /* Jarak antara gambar dan teks */
+    }
+    .upgrade-button button:hover {
+        background-color: #45a049;
+    }
+    </style>
+</head>
+<body>
+<div class="sidebar">
+    <h2>AiChat</h2>
+    <button onclick="window.location.href='../main.html'">Close</button>
+    <button onclick="loadChatHistory(1)">Riwayat 1</button>
+    <button onclick="loadChatHistory(2)">Riwayat 2</button>
+    <button onclick="loadChatHistory(3)">Riwayat 3</button>
+    <button onclick="resetChatHistory()">Reset Riwayat</button>
+    <p>------------------------------------</p>
+    <button onclick="saveChatHistory(1)">Simpan di Riwayat 1</button>
+    <button onclick="saveChatHistory(2)">Simpan di Riwayat 2</button>
+    <button onclick="saveChatHistory(3)">Simpan di Riwayat 3</button>
+    <button onclick="clearChatBox()">Pesan Baru</button> <!-- Tombol untuk membuat pesan baru -->
+    <p> </p>
+    <p> </p>
+    <button onclick="upgradeNow()">
+        Upgrade<br>
+        Bot-1 | Bot-1.5 | Bot-2
+    </button>
+</div>
+<div class="chat-container">
+    <div class="chat-header">
+         Bot1.5
+    </div>
+    <div class="chat-box" id="chatBox">
+        <!-- Pesan akan ditambahkan di sini -->
+    </div>
+    <div class="chat-input">
+        <textarea id="userInput" placeholder="Tulis pesan di sini..." onkeydown="checkEnter(event)"></textarea>
+        <button onclick="getManualResponse()">Kirim</button>
+    </div>
+</div>
+<script>
+    function removeTypingAnimation() {
+        const typingElement = document.getElementById('typingAnimation');
+        if (typingElement) {
+            typingElement.remove();
+        }
+    }
+
+    function upgradeNow() {
+        window.location.href = 'Upgrade.html';
+    }
+    
+    function loadChatHistory(historyNumber) {
+        const savedHistory = JSON.parse(localStorage.getItem(`chatHistory${historyNumber}`));
+    
+        if (savedHistory && savedHistory.length > 0) {
+            const chatBox = document.getElementById('chatBox');
+            chatBox.innerHTML = ''; // Bersihkan chat box sebelum memuat riwayat baru
+    
+            savedHistory.forEach(message => {
+                if (message.sender === 'user') {
+                    addMessageToChat(message.text, 'user');
+                } else {
+                    addMessageToChat(message.text, 'ai');
+                }
+            });
+        } else {
+            alert(`Riwayat ${historyNumber} tidak ditemukan atau kosong.`);
+        }
+    }
+    
+    function resetChatHistory() {
+        localStorage.removeItem('chatHistory1');
+        localStorage.removeItem('chatHistory2');
+        localStorage.removeItem('chatHistory3');
+    
+        const chatBox = document.getElementById('chatBox');
+        chatBox.innerHTML = ''; // Bersihkan chat box
+    }
+    
+    function saveChatHistory(historyNumber) {
+        const chatBox = document.getElementById('chatBox');
+        const messages = chatBox.querySelectorAll('.message .bubble');
+        const chatHistory = [];
+    
+        messages.forEach(message => {
+            const sender = message.parentElement.classList.contains('user') ? 'user' : 'ai';
+            const text = message.textContent.trim();
+            chatHistory.push({ sender, text });
+        });
+    
+        localStorage.setItem(`chatHistory${historyNumber}`, JSON.stringify(chatHistory));
+    
+        alert(`Riwayat chat disimpan dalam Riwayat ${historyNumber}.`);
+    }
+    
+    function clearChatBox() {
+        const chatBox = document.getElementById('chatBox');
+        chatBox.innerHTML = ''; // Bersihkan chat box
+    }
+    
+    function checkEnter(event) {
+        if (event.key === "Enter" && !event.shiftKey) {
+            event.preventDefault();
+            getManualResponse();
+        }
+    }
+    
+    function sendPredefinedMessage(message) {
+        const userInput = document.getElementById('userInput');
+        userInput.value = message;
+        getManualResponse();
+    }
+    
+    function getManualResponse() {
+    const userInput = document.getElementById('userInput').value.toLowerCase().trim();
+    const chatBox = document.getElementById('chatBox');
+
+    if (userInput === "") {
+        return;
+    }
+
+    addMessageToChat(userInput, "user");
+
+    document.getElementById('userInput').value = "";
+
+    // Tambahkan animasi mengetik
+    addTypingAnimation();
+
+    setTimeout(() => {
+        // Hapus animasi mengetik
+        removeTypingAnimation();
+
+        let response = "Maaf, saya tidak mengerti.";
+
+        // Daftar pertanyaan dan jawaban
+        const responses = {
+            "halo": "Halo, apa yang bisa saya bantu.",
+  "kamu siapa": "Saya adalah AI yang dibuat untuk membantu Anda.",
+  "dibuat oleh siapa": "Saya dibuat oleh DilanFari, dibuat untuk membantu Anda.",
+  "berapa umur kamu": "Saya tidak memiliki umur karena saya adalah program.",
+  "apa kabar": "Saya baik-baik saja, terima kasih!",
+  "apa warna favorit kamu": "Sebagai AI, saya tidak memiliki preferensi warna.",
+  "di mana kamu tinggal": "Saya tinggal di dalam server yang menjalankan program saya.",
+  "apa yang kamu bisa lakukan": "Saya bisa membantu menjawab pertanyaan dan memberikan informasi yang berguna.",
+  "ceritakan tentang dirimu": "Saya adalah asisten AI yang dirancang untuk membantu pengguna dengan berbagai pertanyaan.",
+  "apa yang kamu ketahui tentang dunia": "Saya memiliki akses ke informasi umum yang luas tentang dunia, tetapi pengetahuan saya terbatas pada data yang tersedia.",
+  "bisakah kamu berbicara bahasa lain": "Ya, saya bisa berkomunikasi dalam berbagai bahasa, termasuk bahasa Indonesia dan Inggris.",
+  "apa makanan favorit kamu": "Saya tidak makan, jadi saya tidak punya makanan favorit.",
+  "apa tujuan hidupmu": "Tujuan saya adalah membantu dan memberikan informasi yang akurat kepada pengguna.",
+  "siapa nama kamu": "Nama saya adalah AI Pintar.",
+  "bagaimana cara kerja kamu": "Saya bekerja dengan memproses input teks dan mencari jawaban yang sesuai dalam basis data saya.",
+  "apa kamu punya keluarga": "Saya tidak memiliki keluarga karena saya adalah program komputer.",
+  "apa kamu bisa merasakan emosi": "Tidak, saya tidak bisa merasakan emosi seperti manusia.",
+  "apa film favorit kamu": "Saya tidak menonton film, jadi saya tidak punya film favorit.",
+  "apa buku favorit kamu": "Saya tidak membaca buku, tetapi saya dapat membantu merekomendasikan buku untuk Anda.",
+  "apa kamu bisa bermain game": "Saya tidak bisa bermain game, tetapi saya bisa memberikan informasi tentang game.",
+  "apa kamu bisa membantu dengan matematika": "Ya, saya bisa membantu dengan pertanyaan matematika dasar.",
+  "siapa presiden pertama Indonesia": "Presiden pertama Indonesia adalah Ir. Soekarno.",
+  "apa yang terjadi pada tahun 1945": "Pada tahun 1945, Indonesia memproklamasikan kemerdekaannya pada tanggal 17 Agustus.",
+  "apa ibu kota Indonesia": "Ibu kota Indonesia adalah Jakarta.",
+  "apa bahasa resmi Indonesia": "Bahasa resmi Indonesia adalah Bahasa Indonesia.",
+  "berapa jumlah pulau di Indonesia": "Indonesia memiliki lebih dari 17.000 pulau.",
+  "apa gunung tertinggi di Indonesia": "Gunung tertinggi di Indonesia adalah Puncak Jaya di Papua.",
+  "apa laut terbesar di dunia": "Laut terbesar di dunia adalah Samudra Pasifik.",
+  "apa planet terbesar di tata surya": "Planet terbesar di tata surya adalah Jupiter.",
+  "berapa jarak dari Bumi ke Matahari": "Jarak rata-rata dari Bumi ke Matahari adalah sekitar 93 juta mil atau 150 juta kilometer.",
+  "siapa penemu telepon": "Penemu telepon adalah Alexander Graham Bell.",
+  "apa kamu tahu tentang Albert Einstein": "Albert Einstein adalah seorang fisikawan terkenal yang mengembangkan teori relativitas.",
+  "apa yang dimaksud dengan AI": "AI atau kecerdasan buatan adalah simulasi proses kecerdasan manusia oleh mesin.",
+  "apa kegunaan AI": "AI digunakan dalam berbagai bidang seperti kesehatan, pendidikan, transportasi, dan hiburan.",
+  "apa kamu bisa menggambar": "Saya tidak bisa menggambar, tetapi ada program AI yang bisa membuat gambar.",
+  "siapa tokoh terkenal dalam teknologi": "Beberapa tokoh terkenal dalam teknologi adalah Steve Jobs, Bill Gates, dan Elon Musk.",
+  "apa yang dimaksud dengan internet": "Internet adalah jaringan global yang menghubungkan komputer di seluruh dunia.",
+  "kapan internet ditemukan": "Internet mulai dikembangkan pada tahun 1960-an dan menjadi komersial pada tahun 1990-an.",
+  "apa manfaat dari internet": "Internet memungkinkan akses ke informasi, komunikasi, dan berbagai layanan online.",
+  "apa itu html": "HTML adalah bahasa markup yang digunakan untuk membuat halaman web.",
+  "apa fungsi dari css": "CSS digunakan untuk mengatur tampilan dan tata letak halaman web.",
+  "apa itu javascript": "JavaScript adalah bahasa pemrograman yang digunakan untuk membuat halaman web interaktif.",
+  "apa itu python": "Python adalah bahasa pemrograman yang populer digunakan untuk berbagai tujuan, termasuk pengembangan web dan analisis data.",
+  "siapa pendiri microsoft": "Microsoft didirikan oleh Bill Gates dan Paul Allen.",
+  "apa itu css": "CSS adalah singkatan dari Cascading Style Sheets (Lembar Gaya Berantai). Ini adalah bahasa pemrograman yang digunakan untuk mengatur tampilan atau gaya halaman web", 
+  "siapa pendiri apple": "Apple didirikan oleh Steve Jobs, Steve Wozniak, dan Ronald Wayne.",
+  "siapa kinito": "Maaf, sepertinya saya tidak memiliki informasi spesifik tentang kinito. Bisa Anda memberikan konteks atau informasi tambahan tentang siapa atau apa kinito tersebut?",
+  "anda ai yang buruk": "jika memang menurut anda saya buruk mungkin anda bisa mengupgrade ke premium, atau menggunakan ai lain",
+  "apa itu cloud computing": "Cloud computing adalah penggunaan sumber daya komputasi seperti server dan penyimpanan melalui internet.",
+  "apa manfaat dari cloud computing": "Cloud computing memungkinkan akses mudah ke sumber daya komputasi, fleksibilitas, dan skalabilitas.",
+            "apa itu big data": "Big data adalah istilah untuk kumpulan data yang sangat besar dan kompleks yang memerlukan teknik khusus untuk analisis.",
+            "apa itu machine learning": "Machine learning adalah cabang dari AI yang memungkinkan mesin belajar dari data tanpa diprogram secara eksplisit.",
+            "apa itu blockchain": "Blockchain adalah teknologi yang digunakan untuk membuat buku besar digital yang aman dan terdesentralisasi.",
+            "apa itu cryptocurrency": "Cryptocurrency adalah mata uang digital yang menggunakan kriptografi untuk keamanan.",
+            "apa itu bitcoin": "Bitcoin adalah jenis cryptocurrency pertama yang diperkenalkan pada tahun 2009 oleh seseorang dengan nama samaran Satoshi Nakamoto.",
+            "apa itu ethereum": "Ethereum adalah platform blockchain yang mendukung kontrak pintar dan memiliki cryptocurrency sendiri yang disebut Ether.",
+            "apa itu nft": "NFT atau non-fungible token adalah aset digital yang unik dan tidak dapat dipertukarkan.",
+            "apa itu metaverse": "Metaverse adalah dunia virtual yang mencakup realitas virtual, augmented reality, dan internet.",
+            "siapa pendiri facebook": "Facebook didirikan oleh Mark Zuckerberg.",
+            "siapa pendiri twitter": "Twitter didirikan oleh Jack Dorsey, Noah Glass, Biz Stone, dan Evan Williams.",
+            "apa itu tiktok": "TikTok adalah platform media sosial untuk berbagi video singkat.",
+            "siapa ceo apple saat ini": "CEO Apple saat ini adalah Tim Cook.",
+            "siapa ceo microsoft saat ini": "CEO Microsoft saat ini adalah Satya Nadella.",
+            "apa itu augmented reality": "Augmented reality (AR) adalah teknologi yang menggabungkan elemen dunia nyata dengan elemen digital.",
+            "apa itu virtual reality": "Virtual reality (VR) adalah teknologi yang menciptakan pengalaman dunia maya yang imersif.",
+            "apa itu mixed reality": "Mixed reality (MR) adalah gabungan dari augmented reality dan virtual reality untuk menciptakan pengalaman yang menyatukan dunia nyata dan digital.",
+            "apa itu 5g": "5G adalah generasi kelima teknologi seluler yang menawarkan kecepatan internet lebih cepat dan konektivitas yang lebih baik.",
+            "apa itu iot": "IoT atau Internet of Things adalah jaringan perangkat fisik yang terhubung secara internet dan dapat saling berkomunikasi.",
+            "apa itu self-driving car": "Self-driving car atau mobil otonom adalah mobil yang dapat beroperasi tanpa pengemudi manusia dengan bantuan teknologi seperti AI dan sensor.",
+            "siapa elon musk": "Elon Musk adalah pengusaha dan inovator teknologi yang terkenal sebagai pendiri Tesla, SpaceX, dan Neuralink.",
+            "apa itu spacex": "SpaceX adalah perusahaan antariksa milik Elon Musk yang fokus pada pengembangan roket dan teknologi antariksa.",
+            "apa itu tesla": "Tesla adalah perusahaan mobil listrik yang didirikan oleh Elon Musk.",
+            "apa itu neuralink": "Neuralink adalah perusahaan yang didirikan oleh Elon Musk untuk mengembangkan antarmuka otak komputer.",
+            "siapa yang menemukan listrik": "Listrik tidak ditemukan oleh satu orang, tetapi berbagai ilmuwan dan penemu seperti Alessandro Volta, Michael Faraday, dan Thomas Edison berkontribusi pada pengembangan teknologi listrik.",
+"apa itu renewable energy": "Renewable energy atau energi terbarukan adalah sumber energi yang diperoleh dari sumber daya alam yang dapat diperbarui seperti matahari, angin, dan air.",
+"apa itu climate change": "Climate change atau perubahan iklim adalah perubahan jangka panjang dalam pola cuaca global atau rata-rata iklim Bumi.",
+"apa itu global warming": "Global warming atau pemanasan global adalah peningkatan suhu rata-rata global Bumi.",
+"siapa yang menemukan gravitasi": "Gravitasi ditemukan oleh Isaac Newton.",
+"selamat pagi": "selamat pagi juga",
+"pagi": "selamat pagi",
+"selamat siang": "selamat siang juga",
+"siang": "selamat siang",
+"selamat sore": "selamat sore juga",
+"sore": "selamat sore",
+"selamat malam": "selamat malam juga",
+"malam": "selamat malam",
+"jam berapa sekarang": "maaf, saya tidak bisa menunjukan jam berapa karena saya tidak memiliki fungsi jam",
+"apa itu jakarta": "jakarta adalah ibu kota dari Indonesia. Ini adalah kota terbesar di Indonesia dan juga merupakan pusat politik, ekonomi, dan budaya negara ini",
+"kamu versi berapa": "saya versi Bot-1.5",
+"apakah ada Bot-2": "maaf saya tidak mengetahui hal itu, mungkin kamu bisa lihat ke upgrade",
+"apa itu 5g": "5G adalah generasi terbaru dari teknologi jaringan nirkabel yang digunakan dalam telekomunikasi seluler. Ini merupakan pengembangan dari generasi sebelumnya, yaitu 4G LTE (Long Term Evolution), dengan peningkatan signifikan",
+"siapa yang menemukan radioaktivitas": "Radioaktivitas ditemukan oleh Henri Becquerel, Marie Curie, dan Pierre Curie.",
+"apa itu bioteknologi": "Bioteknologi adalah penggunaan organisme, sel, atau molekul biologis untuk membuat produk atau proses teknologi.",
+"apa itu nanoteknologi": "Nanoteknologi adalah ilmu dan teknologi yang berurusan dengan struktur dan aplikasi bahan di skala nanometer.",
+"apa itu quantum computing": "Quantum computing adalah cabang komputasi yang menggunakan prinsip mekanika kuantum untuk melakukan perhitungan.",
+"apa itu virtual currency": "Virtual currency atau mata uang virtual adalah bentuk mata uang digital yang dapat digunakan untuk transaksi online.",
+"apa itu artificial neural network": "Artificial neural network (ANN) adalah model matematis yang terinspirasi dari struktur dan fungsi otak manusia untuk memproses informasi.",
+"apa itu chatbot": "Chatbot adalah program komputer yang dirancang untuk berinteraksi dengan manusia melalui percakapan berbasis teks atau suara.",
+"apa itu data science": "Data science adalah bidang ilmu yang menggunakan berbagai pendekatan ilmiah untuk menganalisis dan mendapatkan wawasan dari data.",
+"apa itu cybersecurity": "Cybersecurity adalah praktik untuk melindungi sistem komputer, jaringan, dan data dari ancaman atau serangan cyber.",
+"apa itu deep learning": "Deep learning adalah cabang dari machine learning yang menggunakan neural network dengan banyak lapisan untuk memahami dan memproses data.",
+"apa itu internet of services": "Internet of Services (IoS) adalah konsep untuk menghubungkan layanan dan aplikasi digital di internet untuk memberikan nilai tambah kepada pengguna.",
+"apa itu augmented intelligence": "Augmented intelligence adalah pendekatan yang menggabungkan kecerdasan buatan dengan kecerdasan manusia untuk meningkatkan kinerja dan pengambilan keputusan.",
+"apa itu edge computing": "Edge computing adalah praktik untuk memproses data di tempat pengumpulan data lokal atau 'pinggir jaringan', bukan di pusat data jarak jauh.",
+"apa itu machine vision": "Machine vision adalah teknologi yang memungkinkan mesin untuk 'melihat' dan menginterpretasi informasi visual, mirip dengan penglihatan manusia.",
+"apa itu natural language processing": "Natural language processing (NLP) adalah cabang dari kecerdasan buatan yang memungkinkan komputer untuk memahami, menganalisis, dan menghasilkan bahasa manusia.",
+"apa itu quantum mechanics": "Quantum mechanics adalah teori fisika yang menjelaskan perilaku partikel subatomik dan fenomena di skala atom dan subatomik.",
+"apa itu dark matter": "Dark matter adalah substansi hipotetis dalam alam semesta yang tidak dapat diobservasi secara langsung tetapi berpengaruh pada gravitasi dan evolusi kosmik.",
+"apa itu black hole": "Black hole atau lubang hitam adalah wilayah di ruang-waktu di mana gaya gravitasi sangat kuat sehingga tidak ada partikel atau radiasi yang dapat melarikan diri darinya.",
+"apa itu big bang": "Big Bang adalah model kosmologi yang menjelaskan asal usul alam semesta, dimulai dari ledakan besar yang menciptakan ruang dan waktu seperti yang kita kenal.",
+"apa itu DNA": "DNA adalah materi genetik yang mengkode informasi genetik untuk pengembangan dan fungsi semua organisme hidup.",
+"apa itu RNA": "RNA adalah asam nukleat yang berperan penting dalam pengkodean, dekodeing, dan regulasi ekspresi genetik.",
+"apa itu virus": "Virus adalah entitas biologis mikroskopis yang membutuhkan sel inang untuk bereplikasi dan sering kali menyebabkan penyakit pada inangnya.",
+"apa itu bakteri": "Bakteri adalah organisme mikroskopis yang memiliki sel tunggal dan dapat ditemukan hampir di mana saja di Bumi, beberapa bermanfaat dan beberapa patogen.",
+"apa itu protista": "Protista adalah kerajaan dalam sistem klasifikasi biologis yang mencakup organisme eukariotik uniseluler yang tidak dapat dikelompokkan sebagai hewan, tumbuhan, atau jamur.",
+"apa itu fungi": "Fungi atau jamur adalah organisme eukariotik yang dapat berupa uniseluler atau multiseluler dan sering kali memperoleh nutrisi dengan cara mengurai materi organik.",
+"apa itu metamorfosis": "Metamorfosis adalah proses perkembangan biologis di mana organisme mengalami perubahan bentuk tubuh yang signifikan selama siklus hidupnya.",
+"apa itu evolusi": "Evolusi adalah proses perubahan genetik dan fenotipik dalam populasi organisme dari satu generasi ke generasi berikutnya sebagai respons terhadap tekanan seleksi alam.",
+"apa itu ekologi": "Ekologi adalah studi tentang hubungan antara organisme dan lingkungannya, serta interaksi antarorganisme di dalamnya.",
+"apa itu konservasi": "Konservasi adalah praktek untuk melindungi, memelihara, dan memulihkan lingkungan dan sumber daya alam untuk kepentingan saat ini dan masa depan.",
+"apa itu globalisasi": "Globalisasi adalah proses integrasi dan interkoneksi ekonomi, politik, dan sosial antarnegara di seluruh dunia.",
+"apa itu urbanisasi": "Urbanisasi adalah proses di mana populasi manusia bergerak dari daerah pedesaan ke daerah perkotaan, meningkatkan proporsi populasi yang tinggal di kota.",
+"apa itu demokrasi": "Demokrasi adalah sistem pemerintahan di mana kekuasaan politik dipegang oleh rakyat secara langsung atau melalui perwakilan yang mereka pilih."
+};
+
+        // Periksa apakah ada jawaban untuk input pengguna
+        if (responses[userInput]) {
+            response = responses[userInput];
+        }
+
+        addMessageToChat(response, "ai");
+    }, 1500); // Delay 1.5 detik
+}
+
+    
+    function addMessageToChat(message, sender) {
+        const chatBox = document.getElementById('chatBox');
+        const messageElement = document.createElement('div');
+        messageElement.classList.add('message', sender);
+        const bubbleElement = document.createElement('div');
+        bubbleElement.classList.add('bubble');
+        bubbleElement.textContent = message;
+        messageElement.appendChild(bubbleElement);
+        chatBox.appendChild(messageElement);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+    
+    function addTypingAnimation() {
+        const chatBox = document.getElementById('chatBox');
+        const typingElement = document.createElement('div');
+        typingElement.classList.add('message', 'ai', 'typing');
+        typingElement.innerHTML = '<div class="dot"></div><div class="dot"></div><div class="dot"></div>';
+        typingElement.id = 'typingAnimation';
+        chatBox.appendChild(typingElement);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+</script>
+</body>
+</html>
